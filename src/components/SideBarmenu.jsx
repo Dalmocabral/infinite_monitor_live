@@ -1,4 +1,3 @@
-// src/components/SidebarBarMenu.jsx
 import { useState } from 'react';
 import { Layout } from 'antd';
 import { CSSTransition } from 'react-transition-group';
@@ -19,7 +18,7 @@ const sessions = {
 const SidebarBarMenu = () => {
   const [collapsed, setCollapsed] = useState(true);
   const [showStatistics, setShowStatistics] = useState(true);
-  const [selectedSession, setSelectedSession] = useState(null);
+  const [selectedSession, setSelectedSession] = useState(sessions.expert);
 
   const handleToggleInfoClick = () => {
     setShowStatistics(!showStatistics);

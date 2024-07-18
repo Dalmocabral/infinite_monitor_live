@@ -5,3 +5,21 @@
   left: 0;
   z-index: 2;
 }
+
+.leaflet-marker-icon.atc-icon {
+  transform-origin: center;
+}
+
+/* src/components/MapLeaflet.css */
+.zulu-clock {
+  position: absolute;
+  top: 10px; /* Muda para o canto superior */
+  right: 10px; /* Mantém no canto direito */
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 10px 20px; /* Aumenta o tamanho do padding */
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+  font-size: 1.2em; /* Aumenta o tamanho da fonte */
+  z-index: 1000;
+}

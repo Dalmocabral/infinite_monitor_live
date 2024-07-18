@@ -1,0 +1,13 @@
+/* src/components/MapLeaflet.css */
+.zulu-clock {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    z-index: 1000;
+  }
+  

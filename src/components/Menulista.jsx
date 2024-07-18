@@ -1,4 +1,3 @@
-// src/components/Menulista.jsx
 import { Menu } from 'antd';
 import {
   FaEarthAmericas,
