@@ -1,8 +1,7 @@
 /* src/components/MapLeaflet.css */
 .map-container {
-    width: 100vw;
-    height: 100vh;    
-    top: 0;
-    left: 0;
-    z-index: 2;
-  }
+  width: 100vw;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}

@@ -1,5 +1,4 @@
 // src/components/MapLeaflet.jsx
-import React from "react";
 import { MapContainer as LeafletMap, TileLayer } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import "./MapLeaflet.css";

@@ -17,7 +17,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 2.5rem;
     border-radius: 50%;
     background: rgb(28, 17, 41, 0.88);    
   }
@@ -32,4 +32,11 @@
   position: relative;
  } 
 
+ .statistics-panel {
+  width: 300px; /* Ajuste o tamanho conforme necessário */
+  background-color: #1f1f1f;
+  color: #ecf0f1;
  
+ 
+  overflow-y: auto;
+}
