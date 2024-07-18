@@ -1,6 +1,5 @@
-// src/components/SessionMap.jsx
-import React, { useEffect, useState } from 'react';
-import { MapContainer as LeafletMap, TileLayer, Popup } from 'react-leaflet';
+import React, { useEffect, useState, useRef } from 'react';
+import { MapContainer as LeafletMap, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -11,6 +10,7 @@ import ZuluClock from './ZuluClock';
 
 const SessionMap = ({ sessionId }) => {
   const [flights, setFlights] = useState([]);
+  const [atcs, setAtcs] = useState([]);
 
   useEffect(() => {
     const fetchFlights = async () => {
@@ -22,9 +22,22 @@ const SessionMap = ({ sessionId }) => {
       }
     };
 
+    const fetchAtcs = async () => {
+      try {
+        const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/atc?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+        setAtcs(response.data.result);
+      } catch (error) {
+        console.error('Error fetching ATC data:', error);
+      }
+    };
+
     if (sessionId) {
       fetchFlights();
-      const intervalId = setInterval(fetchFlights, 120000);
+      fetchAtcs();
+      const intervalId = setInterval(() => {
+        fetchFlights();
+        fetchAtcs();
+      }, 120000); // Atualiza a cada 2 minutos
 
       return () => clearInterval(intervalId);
     }
@@ -42,8 +55,63 @@ const SessionMap = ({ sessionId }) => {
     });
   };
 
+  const drawStar = (map, latlng, size, options) => {
+    const angle = Math.PI / 4;
+    const points = [];
+    for (let i = 0; i < 8; i++) {
+      const radius = i % 2 === 0 ? size : size / 3; // Ajuste o raio das pontas menores para tornar a estrela mais fina
+      points.push([
+        latlng.lat + radius * Math.cos(angle * i) * (180 / Math.PI) / 111320,
+        latlng.lng + radius * Math.sin(angle * i) * (180 / Math.PI) / (111320 * Math.cos(latlng.lat * (Math.PI / 180)))
+      ]);
+    }
+    points.push(points[0]); // Fechar o polígono
+
+    const star = L.polygon(points, options).addTo(map);
+    return star;
+  };
+
+  const mapRef = useRef();
+
+  useEffect(() => {
+    if (mapRef.current) {
+      atcs.forEach(atc => {
+        if (atc.type === 0) { // Ground
+          drawStar(mapRef.current, L.latLng(atc.latitude, atc.longitude), 325, { color: 'yellow', fillColor: 'yellow', fillOpacity: 0.5, weight: 1 });
+        }
+      });
+    }
+  }, [atcs]);
+
+  // Função para obter a cor e o raio do marcador com base no tipo de ATC
+  const getAtcMarkerProps = (type) => {
+    let markerColor;
+    let markerRadius;
+
+    switch (type) {
+      case 0: // Ground
+        markerColor = '#1c186e';
+        markerRadius = 60000;
+        break;
+      case 1: // Tower
+        markerColor = 'red';
+        markerRadius = 18520;
+        break;
+      case 4: // Approach
+      case 5: // Departure
+        markerColor = '#0959c1';
+        markerRadius = 33333;
+        break;
+      default: // Other types
+        markerColor = '#1c186e';
+        markerRadius = 5000;
+    }
+
+    return { color: markerColor, radius: markerRadius };
+  };
+
   return (
-    <LeafletMap center={position} zoom={3} scrollWheelZoom={true} className="map-container">
+    <LeafletMap ref={mapRef} center={position} zoom={3} scrollWheelZoom={true} className="map-container">
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -64,6 +132,28 @@ const SessionMap = ({ sessionId }) => {
           </Popup>
         </RotatedMarker>
       ))}
+      {atcs.map(atc => {
+        const { color, radius } = getAtcMarkerProps(atc.type);
+        return atc.type !== 0 && (
+          <Circle
+            key={atc.frequencyId}
+            center={[atc.latitude, atc.longitude]}
+            radius={radius}
+            color={color}
+            fillColor={color} // Se desejar que o preenchimento tenha a mesma cor
+            fillOpacity={0.5} // Ajuste a opacidade conforme necessário
+          >
+            <Popup>
+              <div>
+                <p><strong>Username:</strong> {atc.username}</p>
+                <p><strong>Airport:</strong> {atc.airportName}</p>
+                <p><strong>Type:</strong> {['Ground', 'Tower', 'Unicom', 'Clearance', 'Approach', 'Departure', 'Center', 'ATIS', 'Aircraft', 'Recorded', 'Unknown', 'Unused'][atc.type]}</p>
+                <p><strong>Start Time:</strong> {new Date(atc.startTime).toLocaleString()}</p>
+              </div>
+            </Popup>
+          </Circle>
+        );
+      })}
       <ZuluClock />
     </LeafletMap>
   );
