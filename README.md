@@ -1,8 +1,9 @@
-# Infinite Monitor Liv
+# Infinite Monitor Live
+![Texto_alternativo_imagem](https://i.ibb.co/CWTsnyH/Captura-de-tela-2024-07-18-220143.png)
 
 ## Visão Geral
 
-Infinite Monitor Liv é um projeto de monitoramento baseado no [Infinite Flight](https://infiniteflight.com/), desenvolvido como uma base de estudo e aprendizado em React. Este projeto foi inspirado pelo site [IVAO Webeye](https://webeye.ivao.aero/), e visa fornecer uma interface amigável para monitorar sessões de voo em tempo real.
+Infinite Monitor Live é um projeto de monitoramento baseado no [Infinite Flight](https://infiniteflight.com/), desenvolvido como uma base de estudo e aprendizado em React. Este projeto foi inspirado pelo site [IVAO Webeye](https://webeye.ivao.aero/), e visa fornecer uma interface amigável para monitorar sessões de voo em tempo real.
 
 ## Funcionalidades
 
