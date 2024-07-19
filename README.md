@@ -1,43 +1,45 @@
-# Infinite Monitor Liv
+# Infinite Monitor Live
+![Alternative text image](https://i.ibb.co/m8ryvzs/Captura-de-tela-2024-07-19-111957.png)
 
-## Visão Geral
+## Overview
 
-Infinite Monitor Liv é um projeto de monitoramento baseado no [Infinite Flight](https://infiniteflight.com/), desenvolvido como uma base de estudo e aprendizado em React. Este projeto foi inspirado pelo site [IVAO Webeye](https://webeye.ivao.aero/), e visa fornecer uma interface amigável para monitorar sessões de voo em tempo real.
+Infinite Monitor Live is a monitoring project based on [Infinite Flight](https://infiniteflight.com/), developed as a base for study and learning in React. This project was inspired by the site [IVAO Webeye](https://webeye.ivao.aero/), and aims to provide a user-friendly interface for monitoring flight sessions in real time.
 
-## Funcionalidades
+## Features
 
-- **Visualização em Mapa**: Monitoramento em tempo real de voos e ATCs em um mapa interativo.
-- **Informações Detalhadas**: Detalhes de cada voo e ATC com popups informativos.
-- **Atualização Automática**: Dados atualizados automaticamente a cada 2 minutos.
-- **Filtros de Visualização**: Diferenciação de tipos de ATC e voos com diferentes cores e marcadores.
+- **Map View**: Real-time monitoring of flights and ATCs on an interactive map.
+- **Detailed Information**: Details of each flight and ATC with informative popups.
+- **Automatic Update**: Data automatically updated every 2 minutes.
+- **View Filters**: Differentiation of ATC types and flights with different colors and markers.
 
-## Estado do Projeto
+## Project Status
 
-Este projeto está atualmente na versão alpha. Estamos continuamente adicionando novas funcionalidades e melhorias. 
+This project is currently in the alpha version. We are continuously adding new features and improvements.
 
-### Funcionalidades Planejadas
+### Planned Features
 
-- **Login para Usuários**: Autenticação e personalização de experiência para usuários registrados.
-- **Cores Diferenciadas**: Diferenciação visual para desenvolvedores, moderadores e streamers do Twitch e YouTube.
-- **Marcadores Personalizados**: Implementação de marcadores personalizados para diferenciar tipos específicos de usuários e atividades.
+- **User Login**: Authentication and personalized experience for registered users.
+- **Distinct Colors**: Visual differentiation for developers, moderators, and Twitch and YouTube streamers.
+- **Custom Markers**: Implementation of custom markers to differentiate specific types of users and activities.
 
-## Como Funciona
+## How It Works
 
-1. **Mapa Interativo**: O mapa utiliza a biblioteca `react-leaflet` para exibir voos e ATCs em tempo real.
-2. **API do Infinite Flight**: Dados são obtidos via chamadas à API pública do Infinite Flight.
-3. **Atualização Dinâmica**: A aplicação faz requisições periódicas para atualizar as informações de voo e ATC.
+1. **Interactive Map**: The map uses the `react-leaflet` library to display flights and ATCs in real time.
+2. **Infinite Flight API**: Data is obtained via calls to the public Infinite Flight API.
+3. **Dynamic Update**: The application makes periodic requests to update flight and ATC information.
 
-## Tecnologias Utilizadas
+## Technologies Used
 
-- **React**: Biblioteca principal para a construção da interface.
-- **Leaflet**: Biblioteca JavaScript para mapas interativos.
-- **Axios**: Utilizado para fazer requisições HTTP à API do Infinite Flight.
-- **CSS**: Estilização da interface.
+- **React**: Main library for building the interface.
+- **Leaflet**: JavaScript library for interactive maps.
+- **Axios**: Used to make HTTP requests to the Infinite Flight API.
+- **CSS**: Interface styling.
 
-## Instalação e Execução
+## Installation and Execution
 
-Para executar o projeto localmente, siga as instruções abaixo:
+To run the project locally, follow the instructions below:
 
-1. Clone o repositório:
+1. Clone the repository:
    ```bash
-   git clone https://github.com/seu-usuario/infinite-monitor-liv.git
+   git clone https://github.com/your-username/infinite-monitor-live.git
+   ```
