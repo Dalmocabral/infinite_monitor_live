@@ -3,10 +3,10 @@
     padding: 10px;
     text-align: center;
     border-radius: 10px;
-    margin-top: 5px; /* Margem superior */
-    margin-bottom: 40px; /* Margem inferior */
-    margin-left: 20px; /* Margem esquerda */
-    margin-right: 20px; /* Margem direita */
+    margin-bottom: 40px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 40px;
 }
 
 .statistics-header h3 {
@@ -14,33 +14,14 @@
     color: white;
 }
 
-.statistics-grafic-count {
-    background-color: #121212;
-    text-align: center;
-    border-radius: 10px;
-    margin-top: 5px; /* Margem superior */
-    margin-bottom: 5px; /* Margem inferior */
-    margin-left: 5px; /* Margem esquerda */
-    margin-right: 5px; /* Margem direita */
-    position: relative;
-}
-
-.statistics-grafic-count h6 {
+.statistics-header p {
     color: white;
-    margin: 0;
-    position: absolute;
-    top: 10px;
-    left: 20px;
-}
-
-.max-value {
-    float: left;
 }
 
 .statistics-content {
     padding: 10px;
-    margin-left: 5px; /* Margem esquerda */
-    margin-right: 5px; /* Margem direita */
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 .statistics-section {
@@ -49,57 +30,107 @@
 
 .statistics-section h4 {
     margin-bottom: 10px;
+    text-align: center;
+    margin-top: 20px;
 }
 
-.airport-table,
-.atc-table {
+.statistics-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.statistics-section ul li {
+    margin-bottom: 5px;
+}
+
+.airport-stat {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
     background-color: #282828;
-    padding: 10px;
-    border-radius: 10px;
-    margin-left: 5px; /* Margem esquerda */
-    margin-right: 5px; /* Margem direita */
-}
-
-.airport-table-header,
-.atc-table-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
-}
-
-.label {
-    font-weight: bold;
-    color: white;
-}
-
-.airport-stat,
-.atc-stat {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
     padding: 10px;
     border-radius: 5px;
 }
 
-.inbound, .airport, .outbound,
-.icao, .grd, .twr, .app, .ctr {
+.airport-table-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    font-size: 15px;
+}
+
+.inbound, .airport, .outbound, .atc-status {
     color: white;
 }
 
-.inbound,
-.icao,
-.grd,
-.twr,
-.app,
-.ctr {
+.inbound {
     flex: 1;
-}
-
-.airport {
-    flex: 2;
-    text-align: center;
+    text-align: left;
 }
 
 .outbound {
-    text-align: left;
+    flex: 1;
+    text-align: right;
+}
+
+.statistics-session {
+    font-size: 25px;
+    text-align: center;
+}
+
+.statistics-user-count {
+    padding: 10px;
+    text-align: center;
+}
+
+.statistics-user-count span {
+    color: rgb(12, 158, 73);
+}
+
+.statistics-section-atc {
+    margin-bottom: 20px;
+}
+
+.statistics-section-atc h4 {
+    margin-bottom: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.statistics-section-atc ul {
+    list-style: none;
+    padding: 0;
+    overflow-x: auto;
+}
+
+.statistics-section-atc ul li {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    white-space: nowrap;
+}
+
+.atc-status {
+    display: flex;
+    gap: 5px;
+}
+
+@media (max-width: 600px) {
+    .statistics-header, .statistics-content {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .airport-stat, .statistics-section-atc ul li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .inbound, .airport, .outbound, .atc-status {
+        text-align: left;
+    }
+
+    .atc-status {
+        justify-content: flex-start;
+    }
 }

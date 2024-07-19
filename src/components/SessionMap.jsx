@@ -67,7 +67,17 @@ const SessionMap = ({ sessionId }) => {
     }
     points.push(points[0]); // Fechar o polígono
 
-    const star = L.polygon(points, options).addTo(map);
+    const star = L.polygon(points, {
+      ...options,
+      weight: 1, // Ajuste a largura da borda da estrela
+      color: 'black', // Cor da borda da estrela
+      fillColor: 'yellow', // Cor de preenchimento da estrela
+      fillOpacity: 0.2 // Opacidade do preenchimento da estrela
+    }).addTo(map).bindPopup(`
+      <div>
+        <p><strong>ATC Type:</strong> Ground</p>
+      </div>
+    `);
     return star;
   };
 
@@ -77,7 +87,7 @@ const SessionMap = ({ sessionId }) => {
     if (mapRef.current) {
       atcs.forEach(atc => {
         if (atc.type === 0) { // Ground
-          drawStar(mapRef.current, L.latLng(atc.latitude, atc.longitude), 325, { color: 'yellow', fillColor: 'yellow', fillOpacity: 0.5, weight: 1 });
+          drawStar(mapRef.current, L.latLng(atc.latitude, atc.longitude), 325, { color: '#e9eaba', fillColor: '#e9eaba', fillOpacity: 0.2, weight: 1 });
         }
       });
     }
@@ -94,20 +104,24 @@ const SessionMap = ({ sessionId }) => {
         markerRadius = 60000;
         break;
       case 1: // Tower
-        markerColor = 'red';
+        markerColor = '#eca3b6';
         markerRadius = 18520;
         break;
       case 4: // Approach
       case 5: // Departure
-        markerColor = '#0959c1';
+        markerColor = '#699fe9';
         markerRadius = 33333;
+        break;
+      case 2: // Unicom
+        markerColor = 'green';
+        markerRadius = 25000;
         break;
       default: // Other types
         markerColor = '#1c186e';
         markerRadius = 5000;
     }
 
-    return { color: markerColor, radius: markerRadius };
+    return { color: markerColor, radius: markerRadius, weight: 1 }; // Ajuste o valor de `weight` para afinar a borda dos círculos
   };
 
   return (
@@ -133,7 +147,7 @@ const SessionMap = ({ sessionId }) => {
         </RotatedMarker>
       ))}
       {atcs.map(atc => {
-        const { color, radius } = getAtcMarkerProps(atc.type);
+        const { color, radius, weight } = getAtcMarkerProps(atc.type);
         return atc.type !== 0 && (
           <Circle
             key={atc.frequencyId}
@@ -142,6 +156,7 @@ const SessionMap = ({ sessionId }) => {
             color={color}
             fillColor={color} // Se desejar que o preenchimento tenha a mesma cor
             fillOpacity={0.5} // Ajuste a opacidade conforme necessário
+            weight={weight} // Ajuste a espessura da borda do círculo
           >
             <Popup>
               <div>

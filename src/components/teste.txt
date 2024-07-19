@@ -1,233 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Line } from 'react-chartjs-2';
-import 'chart.js/auto';
-import './StatisticsPanel.css';
-
-const StatisticsPanel = () => {
-    const [data, setData] = useState([]);
-    const [timestamps, setTimestamps] = useState([]);
-    const [maxValue, setMaxValue] = useState(0);
-    const [airports, setAirports] = useState([]);
-    const [atcData, setAtcData] = useState([]);
-
-    useEffect(() => {
-        const storedData = localStorage.getItem('expertUserCountData');
-        const storedTimestamps = localStorage.getItem('expertUserCountTimestamps');
-        const storedAirports = localStorage.getItem('airportData');
-        const storedAtcData = localStorage.getItem('atcData');
-
-        if (storedData && storedTimestamps) {
-            const parsedData = JSON.parse(storedData);
-            setData(parsedData);
-            setTimestamps(JSON.parse(storedTimestamps));
-            setMaxValue(Math.max(...parsedData));
+useEffect(() => {
+    if (mapRef.current) {
+      atcs.forEach(atc => {
+        if (atc.type === 0) { // Ground
+          drawStar(mapRef.current, L.latLng(atc.latitude, atc.longitude), 325, { color: '#e9eaba', fillColor: '#e9eaba', fillOpacity: 0.2, weight: 1 });
         }
+      });
+    }
+  }, [atcs]);
 
-        if (storedAirports) {
-            setAirports(JSON.parse(storedAirports));
-        }
+  // Função para obter a cor e o raio do marcador com base no tipo de ATC
+  const getAtcMarkerProps = (type) => {
+    let markerColor;
+    let markerRadius;
 
-        if (storedAtcData) {
-            setAtcData(JSON.parse(storedAtcData));
-        }
-
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('https://api.infiniteflight.com/public/v2/sessions?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw');
-                const expertSession = response.data.result.find(session => session.name === 'Expert');
-                if (expertSession) {
-                    const updatedData = [...data, expertSession.userCount].slice(-1440);
-                    const updatedTimestamps = [...timestamps, new Date().toLocaleTimeString()].slice(-1440);
-
-                    setData(updatedData);
-                    setTimestamps(updatedTimestamps);
-                    setMaxValue(Math.max(...updatedData));
-
-                    localStorage.setItem('expertUserCountData', JSON.stringify(updatedData));
-                    localStorage.setItem('expertUserCountTimestamps', JSON.stringify(updatedTimestamps));
-                }
-            } catch (error) {
-                console.error('Erro ao buscar dados da API:', error);
-            }
-        };
-
-        fetchData();
-
-        const intervalId = setInterval(fetchData, 180000);
-
-        return () => clearInterval(intervalId);
-    }, [data, timestamps]);
-
-    useEffect(() => {
-        const fetchAirportsData = async () => {
-            try {
-                const response = await axios.get('https://api.infiniteflight.com/public/v2/world/status/df2a8d19-3a54-4ce5-ae65-0b722186e44c?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw');
-                const airportData = response.data.result;
-                const sortedAirports = airportData.sort((a, b) => b.inboundFlightsCount - a.inboundFlightsCount).slice(0, 5);
-                setAirports(sortedAirports);
-                localStorage.setItem('airportData', JSON.stringify(sortedAirports));
-            } catch (error) {
-                console.error('Erro ao buscar dados da API de aeroportos:', error);
-            }
-        };
-
-        fetchAirportsData();
-
-        const intervalId = setInterval(fetchAirportsData, 300000);
-
-        return () => clearInterval(intervalId);
-    }, []);
-
-    useEffect(() => {
-        const fetchAtcData = async () => {
-            try {
-                const response = await axios.get('https://api.infiniteflight.com/public/v2/sessions/df2a8d19-3a54-4ce5-ae65-0b722186e44c/atc?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw');
-                setAtcData(response.data.result);
-                localStorage.setItem('atcData', JSON.stringify(response.data.result));
-            } catch (error) {
-                console.error('Erro ao buscar dados da API ATC:', error);
-            }
-        };
-
-        fetchAtcData();
-
-        const intervalId = setInterval(fetchAtcData, 300000);
-
-        return () => clearInterval(intervalId);
-    }, []);
-
-    const getTypeLabel = (type) => {
-        const typeLabels = ["grd", "twr", "app", "ctr"];
-        return typeLabels[type] || "";
-    };
-
-    const chartData = {
-        labels: timestamps,
-        datasets: [
-            {
-                label: 'User Count (Expert)',
-                data: data,
-                fill: true,
-                backgroundColor: 'rgba(75,192,192,0.2)',
-                borderColor: 'rgba(75,192,192,1)',
-                borderWidth: 1,
-                pointRadius: 3,
-                pointStyle: 'rect',
-                pointHoverRadius: 5,
-                tension: 0.4,
-            },
-        ],
-    };
-
-    const options = {
-        plugins: {
-            legend: {
-                display: false,
-            },
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        const value = context.raw;
-                        const timestamp = context.label;
-                        return `Time: ${timestamp}, Users: ${value}`;
-                    }
-                }
-            }
-        },
-        scales: {
-            x: {
-                display: false,
-            },
-            y: {
-                display: false,
-            },
-        },
-        elements: {
-            point: {
-                radius: 3,
-                hoverRadius: 6,
-                hoverBackgroundColor: 'rgba(75,192,192,1)',
-            },
-        },
-    };
-
-    const atcGroupedByAirport = atcData.reduce((acc, atc) => {
-        const { airportName, type } = atc;
-        if (!acc[airportName]) {
-            acc[airportName] = { grd: false, twr: false, app: false, ctr: false };
-        }
-        const typeLabel = getTypeLabel(type);
-        if (typeLabel) {
-            acc[airportName][typeLabel] = true;
-        }
-        return acc;
-    }, {});
-
-    const renderHeader = () => (
-        <div className="atc-table-header">
-            <div className="table">
-                <tr>
-                    <th><span className="label">Icao</span></th>
-                    <th><span className="label">grd</span></th>
-                    <th><span className="label">twr</span></th>
-                    <th><span className="label">app</span></th>
-                    <th><span className="label">ctr</span></th>
-                </tr>
-            </div>
-        </div>
-    );
-
-    const renderRow = (airport, status) => (
-        <div key={airport} className="atc-stat">
-
-            <td><span className="icao">{airport}</span></td>
-            <td><span className="grd">{status.grd ? 'x' : ''}</span></td>
-            <td><span className="twr">{status.twr ? 'x' : ''}</span></td>
-            <td><span className="app">{status.app ? 'x' : ''}</span></td>
-            <td><span className="ctr">{status.ctr ? 'x' : ''}</span></td>
-        </div>
-    );
-
-    return (
-        <div className="statistics-panel">
-            <div className="statistics-header">
-                <h3>IVAO WEBEYE 4.0.1</h3>
-            </div>
-            <div className="statistics-grafic-count">
-                <h6><span className="max-value">{maxValue}</span></h6>
-                <Line data={chartData} options={options} />
-            </div>
-            <div className="statistics-content">
-                <div className="statistics-section">
-                    <h4 className='text-center'>Most Popular Airports</h4>
-                    <div className="airport-table">
-                        <div className="airport-table-header">
-                            <span className="label">Inbound</span>
-                            <span className="label"></span>
-                            <span className="label">Outbound</span>
-                        </div>
-                        {airports.map(airport => (
-                            <div key={airport.airportIcao} className="airport-stat">
-                                <span className="inbound">{airport.inboundFlightsCount}</span>
-                                <span className="airport">{airport.airportIcao}</span>
-                                <span className="outbound">{airport.outboundFlightsCount}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <div className="statistics-section-atc">
-                    <h4>ATC Status</h4>
-                    <div className="atc-table">
-                        {renderHeader()}
-                        {Object.keys(atcGroupedByAirport).map(airport =>
-                            renderRow(airport, atcGroupedByAirport[airport])
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default StatisticsPanel;
+    switch (type) {
+      case 0: // Ground
+        markerColor = '#1c186e';
+        markerRadius = 60000;
+        break;
+      case 1: // Tower
+        markerColor = '#eca3b6';
+        markerRadius = 18520;
+        break;
+      case 4: // Approach
+      case 5: // Departure
+        markerColor = '#699fe9';
+        markerRadius = 33333;
+        break;
+      case 2: // Unicom
+        markerColor = 'green';
+        markerRadius = 25000;
+        break;
+      default: // Other types
+        markerColor = '#1c186e';
+        markerRadius = 5000;
+    }
