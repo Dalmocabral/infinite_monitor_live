@@ -1,5 +1,5 @@
 # Infinite Monitor Live
-![Texto_alternativo_imagem](https://i.ibb.co/CWTsnyH/Captura-de-tela-2024-07-18-220143.png)
+![Texto_alternativo_imagem](https://i.ibb.co/m8ryvzs/Captura-de-tela-2024-07-19-111957.png)
 
 ## Visão Geral
 
