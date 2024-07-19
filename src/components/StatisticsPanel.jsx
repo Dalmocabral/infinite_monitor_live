@@ -5,7 +5,7 @@ const StatisticsPanel = () => {
     return (
         <div className="statistics-panel">
             <div className="statistics-header">
-                <h3>InfiniteMonitor 1.0.0</h3>
+                <h3>InfiniteMonitorL 1.0v Alpha</h3>
                 
             </div>
             <div className="statistics-content">
