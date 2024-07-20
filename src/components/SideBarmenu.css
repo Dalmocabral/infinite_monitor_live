@@ -32,11 +32,19 @@
   position: relative;
  } 
 
- .statistics-panel {
-  width: 300px; /* Ajuste o tamanho conforme necessário */
+ 
+/* Oculta a barra de rolagem mas permite o scroll com o mouse */
+.statistics-panel {
+  width: 400px; /* Ajuste o tamanho conforme necessário */
   background-color: #1f1f1f;
-  color: #ecf0f1;
- 
- 
-  overflow-y: auto;
+  color: #ecf0f1; 
+  overflow: hidden; /* Oculta a barra de rolagem */
+  overflow-y: scroll; /* Permite o scroll vertical */
 }
+
+/* Para navegadores Webkit (Chrome, Safari, etc.) */
+.statistics-panel::-webkit-scrollbar {
+  display: none; /* Oculta a barra de rolagem */
+}
+
+

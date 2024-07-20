@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from 'antd';
 import { CSSTransition } from 'react-transition-group';
-import './SideBarmenu.css';
+import './SideBarmenu.css'; // Certifique-se de que este arquivo CSS contém as regras acima
 import Logo from './Logo';
 import Menulista from './Menulista';
 import SessionMap from './SessionMap';
@@ -30,7 +30,12 @@ const SidebarBarMenu = () => {
 
   return (
     <Layout style={{ height: '100vh' }}>
-      <Sider collapsed={collapsed} collapsible trigger={null} className="sidebar">
+      <Sider
+        collapsed={collapsed}
+        collapsible
+        trigger={null}
+        className={`sidebar ${collapsed ? 'collapsed' : ''}`}
+      >
         <Logo />
         <Menulista onToggleInfoClick={handleToggleInfoClick} onSessionSelect={handleSessionSelect} />
       </Sider>
@@ -40,7 +45,7 @@ const SidebarBarMenu = () => {
             <CSSTransition in={showStatistics} timeout={300} classNames="statistics" unmountOnExit>
               <StatisticsPanel sessionId={selectedSession.id} sessionName={selectedSession.name} />
             </CSSTransition>
-            <SessionMap sessionId={selectedSession.id} style={{ flexGrow: 1 }} />
+            <SessionMap sessionId={selectedSession.id} />
           </Content>
         </Layout>
       </Layout>
