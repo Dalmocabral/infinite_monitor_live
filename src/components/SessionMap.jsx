@@ -8,7 +8,7 @@ import atcIconImage from '../assets/airplane.png';
 import RotatedMarker from './RotatedMarker';
 import ZuluClock from './ZuluClock';
 
-const SessionMap = ({ sessionId }) => {
+const SessionMap = ({ sessionId, setSelectedAtc }) => {
   const [flights, setFlights] = useState([]);
   const [atcs, setAtcs] = useState([]);
 
@@ -124,6 +124,11 @@ const SessionMap = ({ sessionId }) => {
     return { color: markerColor, radius: markerRadius, weight: 1 }; // Ajuste o valor de `weight` para afinar a borda dos círculos
   };
 
+  const handleMapClick = () => {
+    setSelectedAtc(null);
+    console.log('select ATC sessiomap', selectedAtc)
+  };
+
   return (
     <LeafletMap ref={mapRef} center={position} zoom={3} scrollWheelZoom={true} className="map-container">
       <TileLayer
@@ -157,6 +162,12 @@ const SessionMap = ({ sessionId }) => {
             fillColor={color} // Se desejar que o preenchimento tenha a mesma cor
             fillOpacity={0.5} // Ajuste a opacidade conforme necessário
             weight={weight} // Ajuste a espessura da borda do círculo
+            eventHandlers={{
+              click: (e) => {
+                setSelectedAtc(atc);
+                e.originalEvent.stopPropagation();
+              },
+            }}
           >
             <Popup>
               <div>

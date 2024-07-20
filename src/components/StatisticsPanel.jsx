@@ -1,8 +1,9 @@
 import React from 'react';
 import './StatisticsPanel.css';
 import WorldSidebar from './WorldSidebar';
+import AtcInfoSidebar from './AtcInfoSidebar';
 
-const StatisticsPanel = ({ sessionId, sessionName }) => {
+const StatisticsPanel = ({ sessionId, sessionName, selectedAtc }) => {
   return (
     <div className="statistics-panel">
       <div className="statistics-header">
@@ -12,7 +13,13 @@ const StatisticsPanel = ({ sessionId, sessionName }) => {
       <div className="statistics-session">
         <h4>{sessionName}</h4>
       </div>
-      <WorldSidebar sessionId={sessionId} sessionName={sessionName} />
+      <div style={{ padding: '20px' }}>
+        {selectedAtc ? (
+          <AtcInfoSidebar atc={selectedAtc} />
+        ) : (
+          <WorldSidebar sessionId={sessionId} sessionName={sessionName} />
+        )}
+      </div>
     </div>
   );
 };

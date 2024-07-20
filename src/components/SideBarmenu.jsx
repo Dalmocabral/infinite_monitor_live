@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from 'antd';
 import { CSSTransition } from 'react-transition-group';
-import './SideBarmenu.css'; // Certifique-se de que este arquivo CSS contém as regras acima
+import './SideBarmenu.css';
 import Logo from './Logo';
 import Menulista from './Menulista';
 import SessionMap from './SessionMap';
@@ -19,6 +19,7 @@ const SidebarBarMenu = () => {
   const [collapsed, setCollapsed] = useState(true);
   const [showStatistics, setShowStatistics] = useState(true);
   const [selectedSession, setSelectedSession] = useState(sessions.expert);
+  const [selectedAtc, setSelectedAtc] = useState(null);
 
   const handleToggleInfoClick = () => {
     setShowStatistics(!showStatistics);
@@ -26,6 +27,11 @@ const SidebarBarMenu = () => {
 
   const handleSessionSelect = (key) => {
     setSelectedSession(sessions[key]);
+  };
+
+  const handleSessionChange = (sessionId) => {
+    setSelectedSession(sessionId);
+    setSelectedAtc(null);
   };
 
   return (
@@ -43,9 +49,9 @@ const SidebarBarMenu = () => {
         <Layout style={{ height: '100%' }}>
           <Content style={{ display: 'flex', flexGrow: 1 }}>
             <CSSTransition in={showStatistics} timeout={300} classNames="statistics" unmountOnExit>
-              <StatisticsPanel sessionId={selectedSession.id} sessionName={selectedSession.name} />
+              <StatisticsPanel sessionId={selectedSession.id} sessionName={selectedSession.name} selectedAtc={selectedAtc} />
             </CSSTransition>
-            <SessionMap sessionId={selectedSession.id} />
+            <SessionMap sessionId={selectedSession.id} setSelectedAtc={setSelectedAtc} />
           </Content>
         </Layout>
       </Layout>

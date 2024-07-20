@@ -78,7 +78,7 @@ const WorldSidebar = ({ sessionId, sessionName }) => {
   return (
     <div className="world-sidebar">
       <div className="statistics-user-count">
-        <h4>Online: <span>{userCount}</span></h4>
+        <h4>Online : <span>{userCount}</span></h4>
       </div>
       <div className="statistics-content">
         <div className="statistics-section">
