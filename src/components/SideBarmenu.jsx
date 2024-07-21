@@ -34,6 +34,17 @@ const SidebarBarMenu = () => {
     setSelectedAtc(null);
   };
 
+  const handleAtcSelect = (atc) => {
+    setSelectedAtc(atc);
+    setShowStatistics(false);
+  };
+
+  const handleBackToStatistics = () => {
+    setSelectedAtc(null);
+    setShowStatistics(true);
+  };
+
+
   return (
     <Layout style={{ height: '100vh' }}>
       <Sider
@@ -52,6 +63,7 @@ const SidebarBarMenu = () => {
               <StatisticsPanel sessionId={selectedSession.id} sessionName={selectedSession.name} selectedAtc={selectedAtc} />
             </CSSTransition>
             <SessionMap sessionId={selectedSession.id} setSelectedAtc={setSelectedAtc} />
+            
           </Content>
         </Layout>
       </Layout>

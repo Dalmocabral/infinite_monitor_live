@@ -126,11 +126,10 @@ const SessionMap = ({ sessionId, setSelectedAtc }) => {
 
   const handleMapClick = () => {
     setSelectedAtc(null);
-    console.log('select ATC sessiomap', selectedAtc)
   };
 
   return (
-    <LeafletMap ref={mapRef} center={position} zoom={3} scrollWheelZoom={true} className="map-container">
+    <LeafletMap ref={mapRef} center={position} zoom={3} scrollWheelZoom={true} className="map-container" onClick={handleMapClick}>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -165,7 +164,7 @@ const SessionMap = ({ sessionId, setSelectedAtc }) => {
             eventHandlers={{
               click: (e) => {
                 setSelectedAtc(atc);
-                e.originalEvent.stopPropagation();
+                e.originalEvent.stopPropagation(); // Evita que o clique no marcador de ATC acione o manipulador de clique no mapa
               },
             }}
           >
