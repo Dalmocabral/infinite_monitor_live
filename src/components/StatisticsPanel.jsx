@@ -10,10 +10,9 @@ const StatisticsPanel = ({ sessionId, sessionName, selectedAtc }) => {
         <h3>Infinite Monitor Live</h3>
         <p>1.0v Alpha</p>
       </div>
-      
       <div style={{ padding: '20px' }}>
         {selectedAtc ? (
-          <AtcInfoSidebar atc={selectedAtc} />
+          <AtcInfoSidebar atc={selectedAtc} sessionId={sessionId} /> // Passando sessionId aqui
         ) : (
           <WorldSidebar sessionId={sessionId} sessionName={sessionName} />
         )}

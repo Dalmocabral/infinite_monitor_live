@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Layout } from 'antd';
 import { CSSTransition } from 'react-transition-group';
 import './SideBarmenu.css';
@@ -6,6 +6,7 @@ import Logo from './Logo';
 import Menulista from './Menulista';
 import SessionMap from './SessionMap';
 import StatisticsPanel from './StatisticsPanel';
+import AtcInfoSidebar from './AtcInfoSidebar';
 
 const { Sider, Content } = Layout;
 
@@ -44,7 +45,6 @@ const SidebarBarMenu = () => {
     setShowStatistics(true);
   };
 
-
   return (
     <Layout style={{ height: '100vh' }}>
       <Sider
@@ -63,7 +63,9 @@ const SidebarBarMenu = () => {
               <StatisticsPanel sessionId={selectedSession.id} sessionName={selectedSession.name} selectedAtc={selectedAtc} />
             </CSSTransition>
             <SessionMap sessionId={selectedSession.id} setSelectedAtc={setSelectedAtc} />
-            
+            {!showStatistics && selectedAtc && (
+              <AtcInfoSidebar atc={selectedAtc} sessionId={selectedSession.id} />
+            )}
           </Content>
         </Layout>
       </Layout>

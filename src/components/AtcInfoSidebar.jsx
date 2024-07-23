@@ -1,13 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import "./AtcInfoSidebar.css";
 
-const AtcInfoSidebar = ({ atc }) => {
+const AtcInfoSidebar = ({ atc, sessionId }) => {
+  const [atisInfo, setAtisInfo] = useState(null);
+  const [notams, setNotams] = useState([]);
+
+  useEffect(() => {
+    if (atc && sessionId) {
+      const fetchAtisInfo = async () => {
+        try {
+          const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/airport/${atc.airportName}/atis?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+          setAtisInfo(response.data.result);
+        } catch (error) {
+          console.error("Error fetching ATIS info:", error);
+        }
+      };
+
+      fetchAtisInfo();
+
+      const fetchNotams = async () => {
+        try {
+          const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/notams?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+          const filteredNotams = response.data.result.filter(notam => notam.icao === atc.airportName);
+          setNotams(filteredNotams);
+        } catch (error) {
+          console.error("Error fetching NOTAMs:", error);
+        }
+      };
+
+      fetchNotams();
+    }
+  }, [atc, sessionId]);
+
   return (
     <div className="atc-info-sidebar">
       <div className="atc-info-header">
         <h3>{atc.airportName}</h3>
         <p>
-          {" "}
           {
             [
               "Ground",
@@ -28,30 +58,31 @@ const AtcInfoSidebar = ({ atc }) => {
       </div>
       <div className="atc-info-atis">
         <span>ATIS</span>
-        <p>
-          ts-1.sa-east-1.ivao.aero/SBXS_APP Salvador Control Information BRAVO
-          recorded at 0040z SBSV 202300Z 19006KT 140V230 8000 VCSH SCT020
-          FEW025TCU SCT060 25/21 Q1020 ARR RWY 10 ILS Z 17 RNP Z / DEP RWY 10 17
-          / TRL FL075 / TA 7000ft CONFIRM ATIS INFO BRAVO on initial contact
-          CPDLC ID SBXS
-        </p>
+        <p>{atisInfo ? atisInfo : "Loading ATIS information..."}</p>
       </div>
-      <div className="atc-info--notan">
-
+      <div className="atc-info-notam">
+        <span>NOTAMs</span>
+        {notams.length > 0 ? (
+          notams.map(notam => (
+            <div key={notam.id} className="notam">
+              <h4>{notam.title}</h4>
+              <p>{notam.message}</p>
+              <p><strong>Author:</strong> {notam.author}</p>
+            </div>
+          ))
+        ) : (
+          <p>No NOTAMs available.</p>
+        )}
       </div>
       <div className="atc-info-inbout-outbount">
-
+        {/* Add any other necessary sections here */}
       </div>
       <div className="atc-info-control">
         <h3>{atc.username}</h3>
         <p>
-        <strong>Time :</strong> {new Date(atc.startTime).toLocaleString()}
-      </p>
+          <strong>Time :</strong> {new Date(atc.startTime).toLocaleString()}
+        </p>
       </div>
-      
-      
-
-      
     </div>
   );
 };
