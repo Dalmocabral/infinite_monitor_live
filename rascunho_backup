@@ -11,12 +11,21 @@ const StatisticsPanel = ({ sessionId, sessionName, selectedAtc }) => {
         <p>1.0v Alpha</p>
       </div>
       <div style={{ padding: '20px' }}>
-     
+        {selectedAtc ? (
+          <AtcInfoSidebar atc={selectedAtc} sessionId={sessionId} /> // Passando sessionId aqui
+        ) : (
           <WorldSidebar sessionId={sessionId} sessionName={sessionName} />
-        
+        )}
       </div>
     </div>
   );
 };
 
 export default StatisticsPanel;
+
+
+
+
+
+
+<AtcInfoSidebar atc={selectedAtc} sessionId={selectedSession.id} />

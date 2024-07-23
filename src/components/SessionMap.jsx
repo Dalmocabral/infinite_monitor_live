@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { MapContainer as LeafletMap, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import { MapContainer as LeafletMap, TileLayer, Circle } from 'react-leaflet';
 import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -8,7 +8,7 @@ import atcIconImage from '../assets/airplane.png';
 import RotatedMarker from './RotatedMarker';
 import ZuluClock from './ZuluClock';
 
-const SessionMap = ({ sessionId, setSelectedAtc }) => {
+const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
   const [flights, setFlights] = useState([]);
   const [atcs, setAtcs] = useState([]);
 
@@ -55,7 +55,7 @@ const SessionMap = ({ sessionId, setSelectedAtc }) => {
     });
   };
 
-  const drawStar = (map, latlng, size, options) => {
+  const drawStar = (map, latlng, size, options, atc) => {
     const angle = Math.PI / 4;
     const points = [];
     for (let i = 0; i < 8; i++) {
@@ -73,11 +73,10 @@ const SessionMap = ({ sessionId, setSelectedAtc }) => {
       color: 'black', // Cor da borda da estrela
       fillColor: 'yellow', // Cor de preenchimento da estrela
       fillOpacity: 0.2 // Opacidade do preenchimento da estrela
-    }).addTo(map).bindPopup(`
-      <div>
-        <p><strong>ATC Type:</strong> Ground</p>
-      </div>
-    `);
+    }).addTo(map).on('click', (e) => {
+      setSelectedAtc(atc);
+      e.originalEvent.stopPropagation(); // Evita que o clique na estrela acione o manipulador de clique no mapa
+    });
     return star;
   };
 
@@ -87,7 +86,7 @@ const SessionMap = ({ sessionId, setSelectedAtc }) => {
     if (mapRef.current) {
       atcs.forEach(atc => {
         if (atc.type === 0) { // Ground
-          drawStar(mapRef.current, L.latLng(atc.latitude, atc.longitude), 325, { color: '#e9eaba', fillColor: '#e9eaba', fillOpacity: 0.2, weight: 1 });
+          drawStar(mapRef.current, L.latLng(atc.latitude, atc.longitude), 325, { color: '#e9eaba', fillColor: '#e9eaba', fillOpacity: 0.2, weight: 1 }, atc);
         }
       });
     }
@@ -126,6 +125,7 @@ const SessionMap = ({ sessionId, setSelectedAtc }) => {
 
   const handleMapClick = () => {
     setSelectedAtc(null);
+    setSelectedFlight(null); // Limpar a seleção do voo quando clicar no mapa
   };
 
   return (
@@ -141,14 +141,13 @@ const SessionMap = ({ sessionId, setSelectedAtc }) => {
           icon={createCustomIcon()}
           rotationAngle={flight.heading}
           rotationOrigin="center"
-        >
-          <Popup>
-            <div>
-              <p><strong>Username:</strong> {flight.username}</p>
-              <p><strong>Callsign:</strong> {flight.callsign}</p>
-            </div>
-          </Popup>
-        </RotatedMarker>
+          eventHandlers={{
+            click: (e) => {
+              setSelectedFlight(flight);
+              e.originalEvent.stopPropagation(); // Evita que o clique no marcador acione o manipulador de clique no mapa
+            },
+          }}
+        />
       ))}
       {atcs.map(atc => {
         const { color, radius, weight } = getAtcMarkerProps(atc.type);
@@ -167,16 +166,7 @@ const SessionMap = ({ sessionId, setSelectedAtc }) => {
                 e.originalEvent.stopPropagation(); // Evita que o clique no marcador de ATC acione o manipulador de clique no mapa
               },
             }}
-          >
-            <Popup>
-              <div>
-                <p><strong>Username:</strong> {atc.username}</p>
-                <p><strong>Airport:</strong> {atc.airportName}</p>
-                <p><strong>Type:</strong> {['Ground', 'Tower', 'Unicom', 'Clearance', 'Approach', 'Departure', 'Center', 'ATIS', 'Aircraft', 'Recorded', 'Unknown', 'Unused'][atc.type]}</p>
-                <p><strong>Start Time:</strong> {new Date(atc.startTime).toLocaleString()}</p>
-              </div>
-            </Popup>
-          </Circle>
+          />
         );
       })}
       <ZuluClock />

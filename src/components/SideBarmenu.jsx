@@ -7,6 +7,7 @@ import Menulista from './Menulista';
 import SessionMap from './SessionMap';
 import StatisticsPanel from './StatisticsPanel';
 import AtcInfoSidebar from './AtcInfoSidebar';
+import UserInfoSidebar from './UserInfoSidebar';
 
 const { Sider, Content } = Layout;
 
@@ -21,6 +22,7 @@ const SidebarBarMenu = () => {
   const [showStatistics, setShowStatistics] = useState(true);
   const [selectedSession, setSelectedSession] = useState(sessions.expert);
   const [selectedAtc, setSelectedAtc] = useState(null);
+  const [selectedFlight, setSelectedFlight] = useState(null);
 
   const handleToggleInfoClick = () => {
     setShowStatistics(!showStatistics);
@@ -33,6 +35,7 @@ const SidebarBarMenu = () => {
   const handleSessionChange = (sessionId) => {
     setSelectedSession(sessionId);
     setSelectedAtc(null);
+    setSelectedFlight(null);
   };
 
   const handleAtcSelect = (atc) => {
@@ -40,18 +43,27 @@ const SidebarBarMenu = () => {
     setShowStatistics(false);
   };
 
+  const handleFlightSelect = (flight) => {
+    setSelectedFlight(flight);
+  };
+
   const handleBackToStatistics = () => {
     setSelectedAtc(null);
     setShowStatistics(true);
   };
 
+  const handleClickOutside = () => {
+    setSelectedFlight(null);
+  };
+
   return (
-    <Layout style={{ height: '100vh' }}>
+    <Layout style={{ height: '100vh' }} onClick={handleClickOutside}>
       <Sider
         collapsed={collapsed}
         collapsible
         trigger={null}
         className={`sidebar ${collapsed ? 'collapsed' : ''}`}
+        onClick={(e) => e.stopPropagation()} // Prevent sidebar clicks from hiding the UserInfoSidebar
       >
         <Logo />
         <Menulista onToggleInfoClick={handleToggleInfoClick} onSessionSelect={handleSessionSelect} />
@@ -62,9 +74,10 @@ const SidebarBarMenu = () => {
             <CSSTransition in={showStatistics} timeout={300} classNames="statistics" unmountOnExit>
               <StatisticsPanel sessionId={selectedSession.id} sessionName={selectedSession.name} selectedAtc={selectedAtc} />
             </CSSTransition>
-            <SessionMap sessionId={selectedSession.id} setSelectedAtc={setSelectedAtc} />
-            {!showStatistics && selectedAtc && (
-              <AtcInfoSidebar atc={selectedAtc} sessionId={selectedSession.id} />
+            <SessionMap sessionId={selectedSession.id} setSelectedAtc={setSelectedAtc} setSelectedFlight={handleFlightSelect} />
+          
+            {selectedFlight && (
+              <UserInfoSidebar flight={selectedFlight} sessionId={selectedSession.id} />
             )}
           </Content>
         </Layout>
