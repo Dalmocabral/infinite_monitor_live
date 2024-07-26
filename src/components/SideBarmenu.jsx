@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Layout } from 'antd';
-import { CSSTransition } from 'react-transition-group';
 import './SideBarmenu.css';
 import Logo from './Logo';
 import Menulista from './Menulista';
@@ -19,13 +18,12 @@ const sessions = {
 
 const SidebarBarMenu = () => {
   const [collapsed, setCollapsed] = useState(true);
-  const [showStatistics, setShowStatistics] = useState(true);
   const [selectedSession, setSelectedSession] = useState(sessions.expert);
   const [selectedAtc, setSelectedAtc] = useState(null);
   const [selectedFlight, setSelectedFlight] = useState(null);
 
   const handleToggleInfoClick = () => {
-    setShowStatistics(!showStatistics);
+    setCollapsed(!collapsed);
   };
 
   const handleSessionSelect = (key) => {
@@ -40,7 +38,6 @@ const SidebarBarMenu = () => {
 
   const handleAtcSelect = (atc) => {
     setSelectedAtc(atc);
-    setShowStatistics(false);
   };
 
   const handleFlightSelect = (flight) => {
@@ -49,20 +46,20 @@ const SidebarBarMenu = () => {
 
   const handleBackToStatistics = () => {
     setSelectedAtc(null);
-    setShowStatistics(true);
   };
 
   const handleClickOutside = () => {
     setSelectedFlight(null);
+    setSelectedAtc(null); // Adicionado para limpar a seleção do ATC ao clicar fora
   };
 
   return (
     <Layout style={{ height: '100vh' }} onClick={handleClickOutside}>
       <Sider
-        collapsed={collapsed}
+        collapsed={true} // Menu sempre retraído
         collapsible
         trigger={null}
-        className={`sidebar ${collapsed ? 'collapsed' : ''}`}
+        className="sidebar"
         onClick={(e) => e.stopPropagation()} // Prevent sidebar clicks from hiding the UserInfoSidebar
       >
         <Logo />
@@ -70,14 +67,15 @@ const SidebarBarMenu = () => {
       </Sider>
       <Layout>
         <Layout style={{ height: '100%' }}>
-          <Content style={{ display: 'flex', flexGrow: 1 }}>
-            <CSSTransition in={showStatistics} timeout={300} classNames="statistics" unmountOnExit>
-              <StatisticsPanel sessionId={selectedSession.id} sessionName={selectedSession.name} selectedAtc={selectedAtc} />
-            </CSSTransition>
-            <SessionMap sessionId={selectedSession.id} setSelectedAtc={setSelectedAtc} setSelectedFlight={handleFlightSelect} />
-          
+          <Content style={{ display: 'flex', flexGrow: 1, position: 'relative' }}>
+            <StatisticsPanel sessionId={selectedSession.id} sessionName={selectedSession.name} selectedAtc={selectedAtc} collapsed={collapsed} />
+            <SessionMap sessionId={selectedSession.id} setSelectedAtc={handleAtcSelect} setSelectedFlight={handleFlightSelect} />
+
             {selectedFlight && (
               <UserInfoSidebar flight={selectedFlight} sessionId={selectedSession.id} />
+            )}
+            {selectedAtc && (
+              <AtcInfoSidebar atc={selectedAtc} sessionId={selectedSession.id} />
             )}
           </Content>
         </Layout>

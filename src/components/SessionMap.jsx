@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { MapContainer as LeafletMap, TileLayer, Circle } from 'react-leaflet';
+import { MapContainer as LeafletMap, TileLayer, Circle, Polyline } from 'react-leaflet';
 import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -11,6 +11,9 @@ import ZuluClock from './ZuluClock';
 const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
   const [flights, setFlights] = useState([]);
   const [atcs, setAtcs] = useState([]);
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+
+  const mapRef = useRef();
 
   useEffect(() => {
     const fetchFlights = async () => {
@@ -37,7 +40,7 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
       const intervalId = setInterval(() => {
         fetchFlights();
         fetchAtcs();
-      }, 120000); // Atualiza a cada 2 minutos
+      }, 30000); // Atualiza a cada 2 minutos
 
       return () => clearInterval(intervalId);
     }
@@ -80,19 +83,6 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
     return star;
   };
 
-  const mapRef = useRef();
-
-  useEffect(() => {
-    if (mapRef.current) {
-      atcs.forEach(atc => {
-        if (atc.type === 0) { // Ground
-          drawStar(mapRef.current, L.latLng(atc.latitude, atc.longitude), 325, { color: '#e9eaba', fillColor: '#e9eaba', fillOpacity: 0.2, weight: 1 }, atc);
-        }
-      });
-    }
-  }, [atcs]);
-
-  // Função para obter a cor e o raio do marcador com base no tipo de ATC
   const getAtcMarkerProps = (type) => {
     let markerColor;
     let markerRadius;
@@ -126,6 +116,37 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
   const handleMapClick = () => {
     setSelectedAtc(null);
     setSelectedFlight(null); // Limpar a seleção do voo quando clicar no mapa
+    setRouteCoordinates([]); // Limpar as coordenadas da rota
+  };
+
+  // Função auxiliar para definir a cor baseado na altitude
+  const getColorFromAltitude = (altitude) => {
+    if (altitude < 3000) return '#FF0000'; // Vermelho para altitudes muito baixas
+    if (altitude < 6000) return '#FF4500'; // Laranja avermelhado
+    if (altitude < 9000) return '#FF7F00'; // Laranja
+    if (altitude < 12000) return '#FFD700'; // Dourado
+    if (altitude < 15000) return '#FFFF00'; // Amarelo
+    if (altitude < 18000) return '#ADFF2F'; // Verde amarelado
+    if (altitude < 21000) return '#00FF00'; // Verde
+    if (altitude < 24000) return '#32CD32'; // Verde limão
+    if (altitude < 27000) return '#00FA9A'; // Verde médio
+    if (altitude < 30000) return '#00FFFF'; // Ciano
+    if (altitude < 33000) return '#1E90FF'; // Azul dodger
+    if (altitude < 36000) return '#0000FF'; // Azul
+    return '#8A2BE2'; // Azul-violeta para altitudes muito altas
+  };
+
+  const fetchRoute = async (flightId) => {
+    try {
+      const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights/${flightId}/route?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+      const routeData = response.data.result.map(point => ({
+        latlng: [point.latitude, point.longitude],
+        altitude: point.altitude
+      }));
+      setRouteCoordinates(routeData);
+    } catch (error) {
+      console.error('Error fetching route data:', error);
+    }
   };
 
   return (
@@ -144,11 +165,25 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
           eventHandlers={{
             click: (e) => {
               setSelectedFlight(flight);
+              fetchRoute(flight.flightId); // Buscar a rota ao clicar no marcador do voo
               e.originalEvent.stopPropagation(); // Evita que o clique no marcador acione o manipulador de clique no mapa
             },
           }}
         />
       ))}
+      {routeCoordinates.length > 1 && routeCoordinates.map((point, index) => {
+        if (index === 0) return null;
+        const prevPoint = routeCoordinates[index - 1];
+        const color = getColorFromAltitude((prevPoint.altitude + point.altitude) / 2);
+        return (
+          <Polyline
+            key={index}
+            positions={[prevPoint.latlng, point.latlng]}
+            color={color}
+            weight={2} // Espessura da linha ajustada
+          />
+        );
+      })}
       {atcs.map(atc => {
         const { color, radius, weight } = getAtcMarkerProps(atc.type);
         return atc.type !== 0 && (

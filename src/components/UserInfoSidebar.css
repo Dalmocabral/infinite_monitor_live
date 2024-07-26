@@ -1,31 +1,199 @@
 /* UserInfoSidebar.css */
 
 .user-info-sidebar {
-    position: absolute;
-    left: 80;
-    top: 0;
-    width: 400px;
-    height: 100%;
-    background-color: #1f1f1f;
-    border-right: 1px solid #ddd;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out;
-  }
+  position: absolute;    
+  width: 400px;
+  height: 100%;
+  background-color: #1f1f1f;
+  color: #fff; 
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+  overflow-y: auto; /* Adiciona rolagem vertical quando necessário */
+}
+
+.user-info-sidebar-enter {
+  transform: translateX(-100%);
+}
+
+.user-info-sidebar-enter-active {
+  transform: translateX(0);
+}
+
+.user-info-sidebar-exit {
+  transform: translateX(0);
+}
+
+.user-info-sidebar-exit-active {
+  transform: translateX(-100%);
+}
+
+.imageLivery {
+  width: 100%;
+  max-height: 150px;
+  overflow: hidden;
+  margin-bottom: 0; /* Remove bottom margin */
+}
+
+.imageLivery img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 0; /* Remove bottom margin */
+}
+
+.usercallsign {
+  background-color: #03459c;
+  margin: 0; /* Remove top margin */
+  padding: 10px; /* Adjust padding as needed */
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+
+.circuloIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #fff; /* Cor do círculo */
+  color: #000; /* Cor do ícone */
+  margin-right: 10px; /* Espaçamento entre o ícone e o texto */
+  font-size: 24px; /* Tamanho do ícone */
+}
+
+/* Adicionar ao final de UserInfoSidebar.css */
+.userroute {
+  background-color: #1868d1;
+  padding: 10px;
+}
+
+
+.userroute span {
+  font-size: 25px;
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  background-color: #1868d1;
+  padding: 10px;
+  border-radius: 10px;  
+  margin-left: 0px; /* Ajusta a margem esquerda */
+  margin-right: 90px;
+}
+
+.progress-bar {
+  flex-grow: 1;
+  height: 6px; /* Ajusta a espessura da barra de progresso */
+  background-color: #333;
+  margin: 0 5px; /* Reduz a margem horizontal */
+  border-radius: 5px;
+  position: relative;
+}
+
+.progress {
+  background-color: #4caf50;
+  height: 100%;
+  border-radius: 5px;
+  position: relative;
+}
+
+.progress-icon {
+  color: #fff;
+  position: absolute;
+  top: -4px; /* Ajustar conforme o design */
+  transform: translateX(-50%);
+}
+
+.col-info-flight-user {  
+  display: flex; 
+  gap: 20px; /* Espaçamento entre os quadrados */
+}
+
+.info-box {
+  width: 90px; /* Defina a largura desejada */
+  height: auto; /* Altura automática para ajustar ao conteúdo */
+  padding: 10px; /* Espaçamento interno */
+  border-radius: 10px; /* Bordas arredondadas */
+  background-color: rgb(45, 45, 46); /* Cor de fundo para visualização */
+  text-align: center; /* Centralizar o texto */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para destacar os quadrados */
+  display: flex;
+  flex-direction: column; /* Empilhar elementos verticalmente */
+  align-items: center; /* Centralizar horizontalmente */
+  justify-content: center; /* Centralizar verticalmente */
+  margin-top: 20px;
   
-  .user-info-sidebar-enter {
-    transform: translateX(-100%);
-  }
+}
+
+.info-box span {
+  font-size: 15px; /* Tamanho da fonte para o span */
+  font-weight: bold; /* Negrito para o span */
+}
+
+.info-box p {
+  font-size: 10px; /* Tamanho da fonte para o p */
+  margin: 0; /* Remover margens padrão */
+  color: #666; /* Cor do texto */
+}
+
+.info-box-user{
+  width: 90px; /* Defina a largura desejada */
+  height: auto; /* Altura automática para ajustar ao conteúdo */
+  padding: 10px; /* Espaçamento interno */
+  border-radius: 10px; /* Bordas arredondadas */
+  background-color: rgb(110, 110, 240); /* Cor de fundo para visualização */
+  text-align: center; /* Centralizar o texto */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para destacar os quadrados */
+  display: flex;
+  flex-direction: column; /* Empilhar elementos verticalmente */
+  align-items: center; /* Centralizar horizontalmente */
+  justify-content: center; /* Centralizar verticalmente */
+  margin-top: 20px;
+}
+
+.route-info-user {
+
+  margin-top: 20px;
+  margin-right: 95px;
+  margin-left: 10px;
+  padding: 10px;
+  background-color:  rgb(45, 45, 46);
+  border-radius: 10px;
+}
+
+.waypoints-container {
+  margin-top: 15px;
+}
+
+.inforusername{
+  margin-top: 20px;
+  padding: 10px;
+  background-color:  rgb(45, 45, 46);
+  margin-left: 20px;
+  margin-right: 95px;
+  border-radius: 10px;
+  text-align: center;
+  margin-bottom: 16px; /* Espaço entre o nome e os ícones */
   
-  .user-info-sidebar-enter-active {
-    transform: translateX(0);
-  }
-  
-  .user-info-sidebar-exit {
-    transform: translateX(0);
-  }
-  
-  .user-info-sidebar-exit-active {
-    transform: translateX(-100%);
-  }
-  
+}
+
+.stream-icons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px; /* Espaço entre o nome e os ícones */
+  font-size: 40px;
+}
+
+.stream-icons a {
+  color: inherit;
+  text-decoration: none;
+}

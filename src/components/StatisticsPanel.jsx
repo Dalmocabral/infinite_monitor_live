@@ -1,9 +1,8 @@
 import React from 'react';
 import './StatisticsPanel.css';
 import WorldSidebar from './WorldSidebar';
-import AtcInfoSidebar from './AtcInfoSidebar';
 
-const StatisticsPanel = ({ sessionId, sessionName, selectedAtc }) => {
+const StatisticsPanel = ({ sessionId, sessionName}) => {
   return (
     <div className="statistics-panel">
       <div className="statistics-header">
