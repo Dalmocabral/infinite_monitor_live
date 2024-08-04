@@ -1,5 +1,5 @@
 # Infinite Monitor Live
-![Alternative text image](https://i.ibb.co/m8ryvzs/Captura-de-tela-2024-07-19-111957.png)
+![Alternative text image](https://i.ibb.co/xj8qM4T/Captura-de-tela-2024-07-28-213941.png)
 
 
 ### [Demo](https://dalmocabral.github.io/infinite_monitor_live/)
