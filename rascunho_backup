@@ -1,30 +1,274 @@
-import React from 'react';
-import './StatisticsPanel.css';
-import WorldSidebar from './WorldSidebar';
-import AtcInfoSidebar from './AtcInfoSidebar';
+import React, { useEffect, useState, useRef } from 'react';
+import { MapContainer as LeafletMap, TileLayer, Circle, Polyline } from 'react-leaflet';
+import axios from 'axios';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import './MapLeaflet.css';
+import atcIconImage from '../assets/airplane.png';
+import RotatedMarker from './RotatedMarker';
+import ZuluClock from './ZuluClock';
 
-const StatisticsPanel = ({ sessionId, sessionName, selectedAtc }) => {
+const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
+  const [flights, setFlights] = useState([]);
+  const [atcs, setAtcs] = useState([]);
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [flightPlanCoordinates, setFlightPlanCoordinates] = useState([]);
+
+  const mapRef = useRef();
+
+  useEffect(() => {
+    const fetchFlights = async () => {
+      try {
+        const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+        setFlights(response.data.result);
+      } catch (error) {
+        console.error('Error fetching flight data:', error);
+      }
+    };
+
+    const fetchAtcs = async () => {
+      try {
+        const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/atc?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+        setAtcs(response.data.result);
+      } catch (error) {
+        console.error('Error fetching ATC data:', error);
+      }
+    };
+
+    if (sessionId) {
+      fetchFlights();
+      fetchAtcs();
+      const intervalId = setInterval(() => {
+        fetchFlights();
+        fetchAtcs();
+      }, 30000); // Atualiza a cada 30 segundos
+
+      return () => clearInterval(intervalId);
+    }
+  }, [sessionId]);
+
+  const position = [6.290741153228356, -31.492690383744065];
+
+  const createCustomIcon = () => {
+    return new L.Icon({
+      iconUrl: atcIconImage,
+      iconSize: [25, 25],
+      iconAnchor: [12, 12],
+      popupAnchor: [0, -12],
+      className: 'atc-icon'
+    });
+  };
+
+  const drawStar = (map, latlng, size, options, atc) => {
+    const angle = Math.PI / 4;
+    const points = [];
+    for (let i = 0; i < 8; i++) {
+      const radius = i % 2 === 0 ? size : size / 3; // Ajuste o raio das pontas menores para tornar a estrela mais fina
+      points.push([
+        latlng.lat + radius * Math.cos(angle * i) * (180 / Math.PI) / 111320,
+        latlng.lng + radius * Math.sin(angle * i) * (180 / Math.PI) / (111320 * Math.cos(latlng.lat * (Math.PI / 180)))
+      ]);
+    }
+    points.push(points[0]); // Fechar o polígono
+
+    const star = L.polygon(points, {
+      ...options,
+      weight: 1, // Ajuste a largura da borda da estrela
+      color: 'black', // Cor da borda da estrela
+      fillColor: 'yellow', // Cor de preenchimento da estrela
+      fillOpacity: 0.2 // Opacidade do preenchimento da estrela
+    }).addTo(map).on('click', (e) => {
+      setSelectedAtc(atc);
+      e.originalEvent.stopPropagation(); // Evita que o clique na estrela acione o manipulador de clique no mapa
+    });
+    return star;
+  };
+
+  useEffect(() => {
+    if (mapRef.current) {
+      atcs.forEach(atc => {
+        if (atc.type === 0) { // Ground
+          drawStar(mapRef.current, L.latLng(atc.latitude, atc.longitude), 325, { color: 'yellow', fillColor: 'yellow', fillOpacity: 0.2, weight: 1 }, atc);
+        }
+      });
+    }
+  }, [atcs]);
+
+  const getAtcMarkerProps = (type) => {
+    let markerColor;
+    let markerRadius;
+
+    switch (type) {
+      case 0: // Ground
+        markerColor = '#1c186e';
+        markerRadius = 60000;
+        break;
+      case 1: // Tower
+        markerColor = '#eca3b6';
+        markerRadius = 18520;
+        break;
+      case 4: // Approach
+      case 5: // Departure
+        markerColor = '#699fe9';
+        markerRadius = 33333;
+        break;
+      case 2: // Unicom
+        markerColor = 'green';
+        markerRadius = 25000;
+        break;
+      default: // Other types
+        markerColor = '#1c186e';
+        markerRadius = 5000;
+    }
+
+    return { color: markerColor, radius: markerRadius, weight: 1 }; // Ajuste o valor de `weight` para afinar a borda dos círculos
+  };
+
+  const handleMapClick = () => {
+    setSelectedAtc(null);
+    setSelectedFlight(null); // Limpar a seleção do voo quando clicar no mapa
+    setRouteCoordinates([]); // Limpar as coordenadas da rota
+    setFlightPlanCoordinates([]); // Limpar as coordenadas do plano de voo
+  };
+
+  // Função auxiliar para definir a cor baseado na altitude
+  const getColorFromAltitude = (altitude) => {
+    if (altitude < 100) return '#FF0000';
+    if (altitude < 2000) return '#FF4500';
+    if (altitude < 3000) return '#FFFF00';
+    if (altitude < 5000) return '#00FF00';
+    if (altitude < 10000) return '#32CD32';
+    if (altitude < 15000) return '#00FA9A';
+    if (altitude < 20000) return '#00FFFF';
+    if (altitude < 25000) return '#1E90FF';
+    return '#0000FF';
+  };
+
+  const fetchRoute = async (flightId) => {
+    try {
+      const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights/${flightId}/route?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+      const routeData = response.data.result.map(point => ({
+        latlng: [point.latitude, point.longitude],
+        altitude: point.altitude
+      }));
+
+      // Obtenha a posição atual da aeronave
+      const flight = flights.find(f => f.flightId === flightId);
+      if (flight) {
+        routeData.push({
+          latlng: [flight.latitude, flight.longitude],
+          altitude: flight.altitude
+        });
+      }
+
+      setRouteCoordinates(routeData);
+    } catch (error) {
+      console.error('Error fetching route data:', error);
+    }
+  };
+
+  const fetchFlightPlan = async (flightId) => {
+    try {
+      const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights/${flightId}/flightplan?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+      const flightPlanData = response.data.result.flightPlanItems
+        .filter(item => item.location.latitude !== 0 && item.location.longitude !== 0)
+        .map(item => ({
+          latlng: [item.location.latitude, item.location.longitude]
+        }));
+      setFlightPlanCoordinates(flightPlanData);
+    } catch (error) {
+      console.error('Error fetching flight plan data:', error);
+    }
+  };
+
   return (
-    <div className="statistics-panel">
-      <div className="statistics-header">
-        <h3>Infinite Monitor Live</h3>
-        <p>1.0v Alpha</p>
-      </div>
-      <div style={{ padding: '20px' }}>
-        {selectedAtc ? (
-          <AtcInfoSidebar atc={selectedAtc} sessionId={sessionId} /> // Passando sessionId aqui
-        ) : (
-          <WorldSidebar sessionId={sessionId} sessionName={sessionName} />
-        )}
-      </div>
-    </div>
+    <LeafletMap ref={mapRef} center={position} zoom={3} scrollWheelZoom={true} className="map-container" onClick={handleMapClick}>
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      />
+      {flights.map(flight => (
+        <RotatedMarker
+          key={flight.flightId}
+          position={[flight.latitude, flight.longitude]}
+          icon={createCustomIcon()}
+          rotationAngle={flight.heading}
+          rotationOrigin="center"
+          eventHandlers={{
+            click: (e) => {
+              setSelectedFlight(flight);
+              fetchRoute(flight.flightId); // Buscar a rota ao clicar no marcador do voo
+              fetchFlightPlan(flight.flightId); // Buscar o plano de voo ao clicar no marcador do voo
+              e.originalEvent.stopPropagation(); // Evita que o clique no marcador acione o manipulador de clique no mapa
+            },
+          }}
+        />
+      ))}
+      {routeCoordinates.length > 1 && routeCoordinates.map((point, index) => {
+        if (index === 0) return null;
+        const prevPoint = routeCoordinates[index - 1];
+        const color = getColorFromAltitude((prevPoint.altitude + point.altitude) / 2);
+        return (
+          <Polyline
+            key={index}
+            positions={[prevPoint.latlng, point.latlng]}
+            color={color}
+            weight={2} // Espessura da linha ajustada
+          />
+        );
+      })}
+      {flightPlanCoordinates.length > 1 && (
+        <Polyline
+          positions={flightPlanCoordinates.map(item => item.latlng)}
+          color="black"
+          weight={1}
+          dashArray="5, 5" // Define o estilo pontilhado
+        />
+      )}
+      {atcs.map(atc => {
+        const { color, radius, weight } = getAtcMarkerProps(atc.type);
+        return atc.type !== 0 && (
+          <Circle
+            key={atc.frequencyId}
+            center={[atc.latitude, atc.longitude]}
+            radius={radius}
+            color={color}
+            fillColor={color} // Se desejar que o preenchimento tenha a mesma cor
+            fillOpacity={0.5} // Ajuste a opacidade conforme necessário
+            weight={weight} // Ajuste a espessura da borda do círculo
+            eventHandlers={{
+              click: (e) => {
+                setSelectedAtc(atc);
+                e.originalEvent.stopPropagation(); // Evita que o clique no marcador de ATC acione o manipulador de clique no mapa
+              },
+            }}
+          />
+        );
+      })}
+      <ZuluClock />
+    </LeafletMap>
   );
 };
 
-export default StatisticsPanel;
+export default SessionMap;
 
 
 
 
 
-
+{routeCoordinates.length > 1 && splitLineAtDateLine(routeCoordinates.map(point => point.latlng)).map((line, index) => (
+  <Polyline
+    key={index}
+    positions={line}
+    color="blue"
+    weight={2} // Espessura da linha ajustada
+  />
+))}
+{flightPlanCoordinates.length > 1 && splitLineAtDateLine(flightPlanCoordinates.map(item => item.latlng)).map((line, index) => (
+  <Polyline
+    key={index}
+    positions={line}
+    color="black"
+    weight={1}
+    dashArray="5, 5" // Define o estilo pontilhado
+  />

@@ -1,63 +1,58 @@
-.atc-info-sidebar{
-    color: #fff;
+.atc-info-sidebar {
+  color: #fff;
+  width: 317px;
+  background-color: #1f1f1f;
+  padding: 20px;
+  position: absolute;
+  left: 0; /* Alinha à esquerda */
+  top: 0;
+  bottom: 0;
+  z-index: 1000;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease; /* Transição suave */
 }
 
-.atc-info-header{
-
-    text-align: center;
-    font-size: 30px;
+.atc-info-header {
+  text-align: center;
+  font-size: 30px;
 }
 
 .atc-info-atis {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: rgb(45, 45, 46);
-    border-radius: 10px;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: rgb(45, 45, 46);
+  border-radius: 10px;
 }
 
 .atc-info-atis span {
-    font-size: 20px;
-
+  font-size: 20px;
 }
 
 .atc-info-control {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: rgb(45, 45, 46);
-    border-radius: 10px;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: rgb(45, 45, 46);
+  border-radius: 10px;
 }
 
-.atc-info-sidebar {
-    width: 317px;
-    background-color:#1f1f1f;
-    padding: 20px;   
-    position: absolute;
-    left: 80; /* Alinha à esquerda */
-    top: 0;
-    bottom: 0;
-    z-index: 1000;
-   
-    
-  }
+.atc-info-notam {
+  margin-top: 30px;
+  padding: 10px;
+  background-color: rgb(45, 45, 46);
+  border-radius: 10px;
+}
 
-  .atc-info-notam{
-    margin-top: 30px;
-    padding: 10px;
-    background-color: rgb(45, 45, 46);
-    border-radius: 10px;
-  }
+.atc-info-inbout-outbount .inbound {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: rgb(45, 45, 46);
+  border-radius: 10px;
+}
 
-  .atc-info-inbout-outbount .inbound {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: rgb(45, 45, 46);
-    border-radius: 10px;
-  }
-
-  .atc-info-inbout-outbount .outbound {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: rgb(45, 45, 46);
-    border-radius: 10px;
-    text-align: left;
-  }
+.atc-info-inbout-outbount .outbound {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: rgb(45, 45, 46);
+  border-radius: 10px;
+  text-align: left;
+}

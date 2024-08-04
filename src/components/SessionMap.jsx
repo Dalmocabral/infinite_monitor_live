@@ -7,11 +7,13 @@ import './MapLeaflet.css';
 import atcIconImage from '../assets/airplane.png';
 import RotatedMarker from './RotatedMarker';
 import ZuluClock from './ZuluClock';
+import aircraftData from './dataSetIconAircraft.json';
 
 const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
   const [flights, setFlights] = useState([]);
   const [atcs, setAtcs] = useState([]);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [flightPlanCoordinates, setFlightPlanCoordinates] = useState([]);
 
   const mapRef = useRef();
 
@@ -40,47 +42,46 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
       const intervalId = setInterval(() => {
         fetchFlights();
         fetchAtcs();
-      }, 30000); // Atualiza a cada 2 minutos
+      }, 30000); // Atualiza a cada 30 segundos
 
       return () => clearInterval(intervalId);
     }
   }, [sessionId]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map) {
+      // Define os limites (bounding box)
+      const southWest = L.latLng(-90, -180);
+      const northEast = L.latLng(90, 180);
+      const bounds = L.latLngBounds(southWest, northEast);
+
+      map.leafletElement.setMaxBounds(bounds);
+      map.leafletElement.setMaxBounds(bounds).setMaxBoundsViscosity(1.0);
+    }
+  }, []);
+
   const position = [6.290741153228356, -31.492690383744065];
 
-  const createCustomIcon = () => {
+  const getAircraftIcon = (aircraftId) => {
+    for (const category in aircraftData) {
+      const aircraft = aircraftData[category].find(a => a.id === aircraftId);
+      if (aircraft) {
+        return new L.Icon({
+          iconUrl: aircraft.icon,
+          iconSize: aircraft.iconSize || [25, 25], // Tamanho padrão se não especificado
+          iconAnchor: [15, 15],
+          popupAnchor: [0, -15]
+        });
+      }
+    }
+    // Retorna um ícone padrão se não encontrar o ID
     return new L.Icon({
       iconUrl: atcIconImage,
-      iconSize: [25, 25],
-      iconAnchor: [12, 12],
-      popupAnchor: [0, -12],
-      className: 'atc-icon'
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -15]
     });
-  };
-
-  const drawStar = (map, latlng, size, options, atc) => {
-    const angle = Math.PI / 4;
-    const points = [];
-    for (let i = 0; i < 8; i++) {
-      const radius = i % 2 === 0 ? size : size / 3; // Ajuste o raio das pontas menores para tornar a estrela mais fina
-      points.push([
-        latlng.lat + radius * Math.cos(angle * i) * (180 / Math.PI) / 111320,
-        latlng.lng + radius * Math.sin(angle * i) * (180 / Math.PI) / (111320 * Math.cos(latlng.lat * (Math.PI / 180)))
-      ]);
-    }
-    points.push(points[0]); // Fechar o polígono
-
-    const star = L.polygon(points, {
-      ...options,
-      weight: 1, // Ajuste a largura da borda da estrela
-      color: 'black', // Cor da borda da estrela
-      fillColor: 'yellow', // Cor de preenchimento da estrela
-      fillOpacity: 0.2 // Opacidade do preenchimento da estrela
-    }).addTo(map).on('click', (e) => {
-      setSelectedAtc(atc);
-      e.originalEvent.stopPropagation(); // Evita que o clique na estrela acione o manipulador de clique no mapa
-    });
-    return star;
   };
 
   const getAtcMarkerProps = (type) => {
@@ -106,7 +107,7 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
         markerRadius = 25000;
         break;
       default: // Other types
-        markerColor = '#1c186e';
+        markerColor = '#0e7c33';
         markerRadius = 5000;
     }
 
@@ -117,23 +118,20 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
     setSelectedAtc(null);
     setSelectedFlight(null); // Limpar a seleção do voo quando clicar no mapa
     setRouteCoordinates([]); // Limpar as coordenadas da rota
+    setFlightPlanCoordinates([]); // Limpar as coordenadas do plano de voo
   };
 
   // Função auxiliar para definir a cor baseado na altitude
   const getColorFromAltitude = (altitude) => {
-    if (altitude < 3000) return '#FF0000'; // Vermelho para altitudes muito baixas
-    if (altitude < 6000) return '#FF4500'; // Laranja avermelhado
-    if (altitude < 9000) return '#FF7F00'; // Laranja
-    if (altitude < 12000) return '#FFD700'; // Dourado
-    if (altitude < 15000) return '#FFFF00'; // Amarelo
-    if (altitude < 18000) return '#ADFF2F'; // Verde amarelado
-    if (altitude < 21000) return '#00FF00'; // Verde
-    if (altitude < 24000) return '#32CD32'; // Verde limão
-    if (altitude < 27000) return '#00FA9A'; // Verde médio
-    if (altitude < 30000) return '#00FFFF'; // Ciano
-    if (altitude < 33000) return '#1E90FF'; // Azul dodger
-    if (altitude < 36000) return '#0000FF'; // Azul
-    return '#8A2BE2'; // Azul-violeta para altitudes muito altas
+    if (altitude < 100) return '#FF0000';
+    if (altitude < 2000) return '#FF4500';
+    if (altitude < 3000) return '#FFFF00';
+    if (altitude < 5000) return '#00FF00';
+    if (altitude < 10000) return '#32CD32';
+    if (altitude < 15000) return '#00FA9A';
+    if (altitude < 20000) return '#00FFFF';
+    if (altitude < 25000) return '#1E90FF';
+    return '#0000FF';
   };
 
   const fetchRoute = async (flightId) => {
@@ -143,14 +141,72 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
         latlng: [point.latitude, point.longitude],
         altitude: point.altitude
       }));
+
+      // Obtenha a posição atual da aeronave
+      const flight = flights.find(f => f.flightId === flightId);
+      if (flight) {
+        routeData.push({
+          latlng: [flight.latitude, flight.longitude],
+          altitude: flight.altitude
+        });
+      }
+
       setRouteCoordinates(routeData);
     } catch (error) {
       console.error('Error fetching route data:', error);
     }
   };
 
+  const fetchFlightPlan = async (flightId) => {
+    try {
+      const response = await axios.get(`https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights/${flightId}/flightplan?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`);
+      const flightPlanData = response.data.result.flightPlanItems
+        .filter(item => item.location.latitude !== 0 && item.location.longitude !== 0)
+        .map(item => ({
+          latlng: [item.location.latitude, item.location.longitude]
+        }));
+      setFlightPlanCoordinates(flightPlanData);
+    } catch (error) {
+      console.error('Error fetching flight plan data:', error);
+    }
+  };
+
+  const splitLineAtDateLine = (points) => {
+    let splitLines = [];
+    let currentLine = [points[0]];
+  
+    for (let i = 1; i < points.length; i++) {
+      const [prevLat, prevLng] = currentLine[currentLine.length - 1];
+      const [currentLat, currentLng] = points[i];
+  
+      // Verifica se cruzou a Linha Internacional de Data
+      if (Math.abs(currentLng - prevLng) > 180) {
+        // Ajusta a longitude para que a linha seja desenhada corretamente
+        const adjustedLng = currentLng > 0 ? currentLng - 360 : currentLng + 360;
+        currentLine.push([currentLat, adjustedLng]);
+        splitLines.push(currentLine);
+        currentLine = [[currentLat, currentLng]];
+      } else {
+        currentLine.push([currentLat, currentLng]);
+      }
+    }
+  
+    splitLines.push(currentLine);
+    return splitLines;
+  };
+  
+
   return (
-    <LeafletMap ref={mapRef} center={position} zoom={3} scrollWheelZoom={true} className="map-container" onClick={handleMapClick}>
+    <LeafletMap
+      ref={mapRef}
+      center={position}
+      zoom={3}
+      scrollWheelZoom={true}
+      className="map-container"
+      onClick={handleMapClick}
+      
+      
+    >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -159,31 +215,37 @@ const SessionMap = ({ sessionId, setSelectedAtc, setSelectedFlight }) => {
         <RotatedMarker
           key={flight.flightId}
           position={[flight.latitude, flight.longitude]}
-          icon={createCustomIcon()}
+          icon={getAircraftIcon(flight.aircraftId)} // Use a função para obter o ícone correto
           rotationAngle={flight.heading}
           rotationOrigin="center"
           eventHandlers={{
             click: (e) => {
               setSelectedFlight(flight);
               fetchRoute(flight.flightId); // Buscar a rota ao clicar no marcador do voo
+              fetchFlightPlan(flight.flightId); // Buscar o plano de voo ao clicar no marcador do voo
               e.originalEvent.stopPropagation(); // Evita que o clique no marcador acione o manipulador de clique no mapa
             },
           }}
         />
       ))}
-      {routeCoordinates.length > 1 && routeCoordinates.map((point, index) => {
-        if (index === 0) return null;
-        const prevPoint = routeCoordinates[index - 1];
-        const color = getColorFromAltitude((prevPoint.altitude + point.altitude) / 2);
-        return (
-          <Polyline
-            key={index}
-            positions={[prevPoint.latlng, point.latlng]}
-            color={color}
-            weight={2} // Espessura da linha ajustada
-          />
-        );
-      })}
+      {routeCoordinates.length > 1 && splitLineAtDateLine(routeCoordinates.map(point => point.latlng)).map((line, index) => (
+       
+        <Polyline
+          key={index}
+          positions={line}
+          color="blue"
+          weight={2} // Espessura da linha ajustada
+        />
+      ))}
+      {flightPlanCoordinates.length > 1 && splitLineAtDateLine(flightPlanCoordinates.map(item => item.latlng)).map((line, index) => (
+        <Polyline
+          key={index}
+          positions={line}
+          color="black"
+          weight={1}
+          dashArray="5, 5" // Define o estilo pontilhado
+        />
+      ))}
       {atcs.map(atc => {
         const { color, radius, weight } = getAtcMarkerProps(atc.type);
         return atc.type !== 0 && (

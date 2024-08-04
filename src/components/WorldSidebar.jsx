@@ -85,6 +85,9 @@ const WorldSidebar = ({ sessionId, sessionName }) => {
         <h4>Online : <span>{userCount}</span></h4>
       </div>
       <div className="statistics-content">
+        <div className="grafic-arplaner-count">
+          
+        </div>
         <div className="statistics-section">
           <h4>Most Popular Airports</h4>
           <div className="airport-table">

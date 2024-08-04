@@ -141,7 +141,7 @@ const UserInfoSidebar = ({ flight, sessionId }) => {
   };
 
   const getLiveryImage = (liveryId) => {
-    const livery = liveries.find((l) => l.LiveryId === liveryId);
+    const livery = liveries.find((l) => l.id === liveryId);
     return livery ? livery.image : defaultImage;
   };
 

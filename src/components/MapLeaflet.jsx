@@ -5,11 +5,13 @@ import "./MapLeaflet.css";
 
 const MapLeaflet = () => {
   const position = [6.290741153228356, -31.492690383744065];
+  
   return (
     <LeafletMap
       center={position}
       zoom={3}
       scrollWheelZoom={false}
+      
       className="map-container"
     >
       <TileLayer
