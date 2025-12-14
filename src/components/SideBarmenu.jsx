@@ -11,9 +11,9 @@ import UserInfoSidebar from './UserInfoSidebar';
 const { Sider, Content } = Layout;
 
 const sessions = {
-  training: { id: '45173539-5080-4c95-9b93-a24713d96ec8', name: 'Training Server' },
-  casual: { id: 'd01006e4-3114-473c-8f69-020b89d02884', name: 'Casual Server' },
-  expert: { id: 'df2a8d19-3a54-4ce5-ae65-0b722186e44c', name: 'Expert Server' }
+  training: { id: '15f884a5-52ec-467e-bda5-414d4569544d', name: 'Training Server' },
+  casual: { id: '1f5ff830-8e4d-4477-89e7-21c136d54844', name: 'Casual Server' },
+  expert: { id: 'ed323139-baa7-4834-b9d6-5fb9f19ff11e', name: 'Expert Server' }
 };
 
 const SidebarBarMenu = () => {
